@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin | BHC Library</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    .admin-container {
+      max-width: 1100px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #0b3d91;
+      margin-bottom: 20px;
+    }
+
+    .logout-btn {
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+    }
+    .logout-btn:hover { background: #b52b27; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background-color: #0b3d91;
+      color: white;
+    }
+
+    td button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    td button:hover { background-color: #0056b3; }
+
+    .form-section {
+      background: #f8f9fc;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 15px;
+    }
+
+    .btn {
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid #eee;
+      margin: 30px 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container">
+      <a href="#" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Bataan_Heroes_College%27s_Official_Seal.jpg" alt="BHC Logo">
+        <span>Bataan Heroes College Library</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="admin-container">
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+      <h1>Admin Dashboard</h1>
+<div class="form-section" id="summarySection">
+  <h2>Library Overview</h2>
+  <p>Total Books: <strong id="totalBooks">0</strong></p>
+  <p>Borrowed Books: <strong id="borrowedBooks">0</strong></p>
+  <p>Registered Users: <strong id="totalUsers">0</strong></p>
+</div>
+
+      <!-- BOOK MANAGEMENT -->
+      <div class="form-section">
+        <h2 id="formTitle">Add Book</h2>
+        <form id="bookForm">
+          <input type="hidden" name="id" />
+          <div class="form-group">
+            <label>Title</label>
+            <input name="title" required />
+          </div>
+          <div class="form-group">
+            <label>Author</label>
+            <input name="author" required />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input name="category" />
+          </div>
+          <button class="btn" type="submit">Save</button>
+          <button type="button" class="btn btn-secondary" onclick="resetForm()">Cancel</button>
+          <div id="bookStatus" class="status"></div>
+        </form>
+      </div>
+
+      <h2>Books List</h2>
+      <table id="booksTable">
+        <thead>
+          <tr>
+            <th>Title</th><th>Author</th><th>Category</th><th>Status</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <hr>
+
+      <h2>Borrowed Books</h2>
+      <table id="borrowTable">
+        <thead>
+          <tr>
+            <th>Title</th><th>Borrower</th><th>Borrowed Date</th><th>Return Date</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+<hr>
+
+<h2>Registered Users</h2>
+<table id="usersTable">
+  <thead>
+    <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+
+  <footer class="main-footer">
+    <div class="container">
+      <p>&copy; 2025 Bataan Heroes College. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById("bookForm");
+    const bookStatus = document.getElementById("bookStatus");
+    const formTitle = document.getElementById("formTitle");
+    const booksTable = document.querySelector("#booksTable tbody");
+    const borrowTable = document.querySelector("#borrowTable tbody");
+
+    // ✅ Session check
+    async function checkSession() {
+      const res = await fetch("/api/me");
+      if (!res.ok) window.location.href = "login.html";
+      const data = await res.json();
+      if (!data.user || data.user.role !== "admin") window.location.href = "login.html";
+    }
+
+    // 📚 Fetch books
+    async function fetchBooks() {
+      booksTable.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+      try {
+        const res = await fetch("/api/books");
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        booksTable.innerHTML = data.data.map(b => `
+          <tr>
+            <td>${b.title}</td>
+            <td>${b.author}</td>
+            <td>${b.category || '-'}</td>
+            <td>${b.status}</td>
+            <td>
+              <button class="btn btn-secondary" onclick="editBook(${b.id}, '${escapeJs(b.title)}', '${escapeJs(b.author)}', '${escapeJs(b.category || "")}')">Edit</button>
+              <button class="btn btn-danger" onclick="deleteBook(${b.id})">Delete</button>
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        booksTable.innerHTML = `<tr><td colspan='5'>Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 🧾 Fetch borrowed books
+    async function fetchBorrows() {
+      borrowTable.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
+      try {
+        const res = await fetch("/api/borrows");
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+
+        borrowTable.innerHTML = data.data.map(b => `
+          <tr>
+            <td>${b.title}</td>
+            <td>${b.borrower}</td>
+            <td>${b.borrow_date}</td>
+            <td>${b.return_date}</td>
+            <td>${b.status}</td>
+            <td>
+              ${b.status !== "returned"
+                ? `<button class="btn btn-secondary" onclick="markReturned(${b.id})">Mark Returned</button>`
+                : `<span style='color:gray;'>Returned</span>`}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        borrowTable.innerHTML = `<tr><td colspan='6'>Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 📊 Fetch summary counts
+async function fetchSummary() {
+  try {
+    const res = await fetch("/api/summary");
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById("totalBooks").textContent = data.totalBooks;
+      document.getElementById("borrowedBooks").textContent = data.borrowedBooks;
+      document.getElementById("totalUsers").textContent = data.totalUsers;
+    }
+  } catch (err) {
+    console.error("Summary load error:", err);
+  }
+}
+
+async function fetchUsers() {
+  const table = document.querySelector("#usersTable tbody");
+  table.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
+  try {
+    const res = await fetch("/api/users");
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    table.innerHTML = data.data.map(u => `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.role}</td>
+      </tr>
+    `).join("");
+  } catch (err) {
+    table.innerHTML = `<tr><td colspan='3'>Error: ${err.message}</td></tr>`;
+  }
+}
+
+
+    // ➕ Add / Update book
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        title: form.title.value.trim(),
+        author: form.author.value.trim(),
+        category: form.category.value.trim()
+      };
+
+      try {
+        let res;
+        if (form.id.value) {
+          res = await fetch(`/api/books/${form.id.value}`, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch("/api/books", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(payload)
+          });
+        }
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        bookStatus.textContent = "✅ Saved successfully!";
+        resetForm();
+        fetchBooks();
+      } catch (err) {
+        bookStatus.textContent = "❌ " + err.message;
+      }
+    });
+
+    // ✏️ Edit book
+    function editBook(id, title, author, category) {
+      form.id.value = id;
+      form.title.value = title;
+      form.author.value = author;
+      form.category.value = category;
+      formTitle.textContent = "Edit Book";
+    }
+
+    // 🗑️ Delete book
+    async function deleteBook(id) {
+      if (!confirm("Delete this book?")) return;
+      const res = await fetch(`/api/books/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) fetchBooks();
+      else alert(data.error);
+    }
+
+    // 🔙 Mark as returned
+    async function markReturned(id) {
+      if (!confirm("Mark this book as returned?")) return;
+      const res = await fetch(`/api/borrows/${id}`, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ status: "returned" })
+      });
+      const data = await res.json();
+      if (data.success) fetchBorrows();
+      else alert(data.error);
+    }
+
+    function resetForm() {
+      form.reset();
+      form.id.value = "";
+      formTitle.textContent = "Add Book";
+      bookStatus.textContent = "";
+    }
+
+    function escapeJs(s) {
+      return (s || "").replaceAll("'", "\\'").replaceAll('"', '\\"');
+    }
+
+    // 🚪 Logout
+    document.getElementById("logoutBtn").onclick = async () => {
+      await fetch("/api/logout", { method: "POST" });
+      window.location.href = "login.html";
+    };
+
+    // 🚀 Init
+checkSession();
+fetchBooks();
+fetchBorrows();
+fetchSummary();
+fetchUsers();
+
+
+  </script>
+</body>
+</html>

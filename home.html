@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library | Student Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    .dashboard {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #0b3d91;
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .search-box input {
+      width: 70%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px 0 0 5px;
+      font-size: 15px;
+    }
+
+    .search-box button {
+      background-color: #0b3d91;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background-color: #0b3d91;
+      color: white;
+    }
+
+    td button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    td button:hover {
+      background-color: #0056b3;
+    }
+
+    .status {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .logout-btn {
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+      margin-bottom: 20px;
+    }
+
+    .logout-btn:hover {
+      background: #b52b27;
+    }
+
+    hr {
+      border: none;
+      border-top: 2px solid #eee;
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container">
+      <a href="#" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Bataan_Heroes_College%27s_Official_Seal.jpg" alt="BHC Logo">
+        <span>Bataan Heroes College Library</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="dashboard">
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+ <h1>Available Books</h1>
+
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search books by title, author, or category...">
+  <button id="searchBtn">Search</button>
+</div>
+
+<!-- Borrow Modal -->
+<div id="borrowModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+  <div style="background:#fff; padding:20px; border-radius:8px; width:320px;">
+    <h3>Borrow Book</h3>
+    <p id="bookTitle"></p>
+    <label>Return Date:</label>
+    <input type="date" id="returnDate" style="width:100%; padding:8px; margin-top:5px;">
+    <div style="margin-top:15px; text-align:right;">
+      <button id="cancelBorrow" style="background:#ccc; border:none; padding:6px 10px; border-radius:5px;">Cancel</button>
+      <button id="confirmBorrow" style="background:#0b3d91; color:white; border:none; padding:6px 10px; border-radius:5px;">Confirm</button>
+    </div>
+  </div>
+</div>
+
+
+      <table id="bookList">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <hr>
+
+      <h2>My Borrowed Books</h2>
+      <table id="borrowedList">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Return Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="status" id="status"></div>
+    </div>
+  </main>
+
+  <footer class="main-footer">
+    <div class="container">
+      <p>&copy; 2025 Bataan Heroes College. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const bookList = document.querySelector("#bookList tbody");
+    const borrowedList = document.querySelector("#borrowedList tbody");
+    const statusDiv = document.getElementById("status");
+
+    // ✅ Check session
+    async function checkSession() {
+      const res = await fetch("/api/me");
+      if (!res.ok) {
+        window.location.href = "login.html";
+        return;
+      }
+      const data = await res.json();
+      if (!data.user || data.user.role !== "student") {
+        window.location.href = "login.html";
+      }
+    }
+
+    // 📚 Load available books
+    async function loadBooks(query = "") {
+      bookList.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+      try {
+        const res = await fetch(`/api/books?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        if (data.data.length === 0) {
+          bookList.innerHTML = "<tr><td colspan='5'>No books found.</td></tr>";
+          return;
+        }
+
+        bookList.innerHTML = data.data.map(book => `
+          <tr>
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+            <td>${book.category || '-'}</td>
+            <td>${book.status === 'borrowed' ? 'Borrowed' : 'Available'}</td>
+            <td>
+              ${book.status === 'available' 
+                ? `<button onclick="borrowBook(${book.id}, '${book.title.replace(/'/g, "\\'")}')">Borrow</button>
+` 
+                : `<span style='color:gray;'>Unavailable</span>`}
+            </td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        bookList.innerHTML = `<tr><td colspan="5">Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 📖 Borrow book
+    let selectedBookId = null;
+
+// Open borrow modal
+function borrowBook(book_id, title) {
+  selectedBookId = book_id;
+  document.getElementById("bookTitle").textContent = title;
+  document.getElementById("returnDate").value = "";
+  document.getElementById("borrowModal").style.display = "flex";
+}
+
+// Cancel borrow
+document.getElementById("cancelBorrow").onclick = () => {
+  document.getElementById("borrowModal").style.display = "none";
+  selectedBookId = null;
+};
+
+// Confirm borrow
+document.getElementById("confirmBorrow").onclick = async () => {
+  const return_date = document.getElementById("returnDate").value;
+  if (!return_date) return alert("Please select a return date.");
+
+  statusDiv.textContent = "Processing...";
+  try {
+    const res = await fetch("/api/borrow", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ book_id: selectedBookId, return_date })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Failed to borrow");
+    statusDiv.textContent = "✅ Borrowed successfully!";
+    document.getElementById("borrowModal").style.display = "none";
+    loadBooks();
+    loadBorrowed();
+  } catch (err) {
+    statusDiv.textContent = "❌ " + err.message;
+  }
+};
+
+
+    // 🧾 Load borrowed books
+    async function loadBorrowed() {
+      borrowedList.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
+      try {
+        const res = await fetch("/api/borrowed");
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        if (data.data.length === 0) {
+          borrowedList.innerHTML = "<tr><td colspan='3'>You haven't borrowed any books yet.</td></tr>";
+          return;
+        }
+
+        borrowedList.innerHTML = data.data.map(b => `
+          <tr>
+            <td>${b.title}</td>
+            <td>${b.return_date}</td>
+            <td>${b.status || 'Borrowed'}</td>
+          </tr>
+        `).join("");
+      } catch (err) {
+        borrowedList.innerHTML = `<tr><td colspan='3'>Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 🚪 Logout
+    document.getElementById("logoutBtn").onclick = async () => {
+      await fetch("/api/logout", { method: "POST" });
+      window.location.href = "login.html";
+    };
+
+    // 🔍 Search books
+    document.getElementById("searchBtn").onclick = () => {
+      const query = document.getElementById("searchInput").value.trim();
+      loadBooks(query);
+    };
+
+    // 🚀 Init
+    checkSession();
+    loadBooks();
+    loadBorrowed();
+  </script>
+</body>
+</html>

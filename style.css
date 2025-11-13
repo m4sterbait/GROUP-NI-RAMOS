@@ -1,0 +1,219 @@
+/* --- Global Styles & Variables --- */
+:root {
+    --primary-red: #c00000;
+    --primary-white: #ffffff;
+    --light-gray: #f8f9fa;
+    --medium-gray: #e9ecef;
+    --dark-text: #343a40;
+    --font-family: 'Poppins', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-white);
+    color: var(--dark-text);
+    line-height: 1.7;
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.page-section { padding: 4rem 0; }
+.page-title { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; }
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 3rem;
+    position: relative;
+}
+.section-title::after {
+    content: ''; display: block; width: 60px; height: 4px;
+    background: var(--primary-red); margin: 0.5rem auto 0;
+}
+.bg-light { background-color: var(--light-gray); }
+.text-center { text-align: center; }
+
+/* --- Header & Navigation --- */
+.main-header {
+    background-color: var(--primary-white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 0; position: sticky; top: 0; z-index: 1000;
+}
+.main-header .container { display: flex; justify-content: space-between; align-items: center; }
+.logo { 
+    font-size: 1.2rem; font-weight: 700; color: var(--primary-red); 
+    text-decoration: none; display: flex; align-items: center; gap: 12px;
+}
+.logo img { height: 45px; width: auto; }
+.main-nav ul { display: flex; list-style: none; gap: 2rem; }
+.main-nav a {
+    text-decoration: none; font-weight: 500; color: var(--dark-text);
+    padding-bottom: 5px; position: relative; transition: color 0.3s ease;
+}
+.main-nav a.active { color: var(--primary-red); font-weight: 600; }
+
+/* --- Footer --- */
+.main-footer {
+    background-color: var(--dark-text); color: var(--primary-white);
+    text-align: center; padding: 2rem 0;
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block; padding: 0.75rem 2rem; font-size: 1rem;
+    font-weight: 600; border-radius: 8px; cursor: pointer;
+    text-decoration: none; transition: all 0.3s ease;
+}
+.btn-primary { background-color: var(--primary-red); color: var(--primary-white); border: 1px solid var(--primary-red); }
+.btn-primary:hover { background-color: #a00000; }
+.btn-secondary { background-color: var(--medium-gray); color: var(--dark-text); border: 1px solid var(--medium-gray); }
+
+/* --- Landing Page: Hero Section --- */
+.hero-section { background: var(--light-gray); padding: 5rem 0; }
+.hero-container { display: flex; align-items: center; gap: 3rem; }
+.hero-text { flex: 1; }
+.hero-text h1 { font-size: 3rem; line-height: 1.2; margin-bottom: 1rem; color: var(--primary-red); }
+.hero-text p { font-size: 1.1rem; margin-bottom: 2rem; }
+.hero-image { flex: 1; text-align: center; }
+.hero-image img { max-width: 100%; height: auto; }
+
+/* --- Search Page: Search Section --- */
+.search-section { padding-bottom: 0; }
+.search-section .container { max-width: 900px; }
+.opac-search-form { background-color: var(--light-gray); padding: 2rem; border-radius: 12px; }
+.search-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.opac-search-form input, .opac-search-form select {
+    width: 100%; padding: 0.75rem 1rem; font-family: var(--font-family); font-size: 1rem;
+    border: 1px solid var(--medium-gray); border-radius: 8px;
+}
+.opac-search-form input { flex: 3; }
+.opac-search-form select { flex: 1; }
+.button-row { display: flex; justify-content: center; gap: 1rem; }
+
+/* --- Search Page: Featured Books Section --- */
+.featured-books-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+}
+.book-card {
+    background: var(--primary-white); text-align: center; border-radius: 10px;
+    overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.book-card:hover { transform: translateY(-8px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+.book-card img { max-width: 100%; height: 300px; object-fit: cover; display: block; }
+.book-card h3 { font-size: 1.1rem; margin: 1rem 0.5rem 0.25rem; color: var(--dark-text); }
+.book-card p { font-size: 0.9rem; color: #6c757d; padding-bottom: 1rem; }
+
+/* --- About Page (UPDATED STYLES) --- */
+.about-content { text-align: center; }
+.about-text { max-width: 800px; margin: 0 auto; }
+.about-text h2 { font-size: 2rem; margin-bottom: 1rem; color: var(--primary-red); }
+
+/* --- Contact Page --- */
+.contact-wrapper { display: flex; background: var(--primary-white); border: 1px solid var(--medium-gray); border-radius: 10px; overflow: hidden; }
+.contact-form { flex: 2; padding: 2.5rem; }
+.contact-details { flex: 1; background: var(--primary-red); color: var(--primary-white); padding: 2.5rem; }
+.contact-form h3, .contact-details h3 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+.contact-details p { margin-bottom: 1.5rem; line-height: 1.5; }
+.contact-details strong { opacity: 0.8; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; margin-bottom: .5rem; font-weight: 500; }
+.form-group input, .form-group textarea {
+    width: 100%; padding: .75rem; border: 1px solid var(--medium-gray); border-radius: 5px;
+    font-family: var(--font-family); font-size: 1rem;
+}
+.form-group textarea { resize: vertical; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .main-nav { display: none; }
+    .hero-container, .about-content, .librarian-grid { flex-direction: column; text-align: center; }
+    .hero-text { margin-bottom: 2rem; }
+    .search-row { flex-direction: column; }
+    .contact-wrapper { flex-direction: column; }
+    .page-title { font-size: 2rem; }
+    .hero-text h1 { font-size: 2.5rem; }
+    .logo span { display: none; }
+    .services-grid { flex-direction: column; }
+}
+
+/* --- STYLES FOR ABOUT PAGE (UPDATED) --- */
+/* Vision Section */
+.vision-text {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.2rem;
+    font-style: italic;
+    color: #555;
+}
+.availability-note {
+    max-width: 800px;
+    margin: 1.5rem auto 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 1rem;
+    background-color: var(--medium-gray);
+    border-left: 5px solid var(--primary-red);
+}
+
+/* Meet Our Librarians Section */
+.librarian-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+.librarian-card {
+    background: var(--primary-white);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    border-top: 4px solid var(--primary-red);
+}
+.librarian-card h3 {
+    font-size: 1.4rem;
+    color: var(--dark-text);
+}
+.librarian-card .title {
+    font-weight: 600;
+    color: var(--primary-red);
+    margin-bottom: 0.5rem;
+}
+.librarian-card .bio {
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+
+/* Landing Page Services Section */
+.services-section {
+    background-color: var(--primary-white);
+}
+.services-grid {
+    display: flex;
+    gap: 2rem;
+    text-align: center;
+}
+.service-card {
+    flex: 1;
+    padding: 2rem;
+    border-radius: 10px;
+    background-color: var(--light-gray);
+    border-top: 4px solid var(--primary-red);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.service-card .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.service-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-red);
+}
